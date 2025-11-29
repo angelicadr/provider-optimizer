@@ -1,0 +1,15 @@
+bin/
+obj/
+.vs/
+.env
+*.db
+*.sqlite
+*/Migrations/
+**/bin/
+**/obj/
+.vscode/
+.idea/
+.vscode/*
+docker-compose.override.yml
+node_modules/
+.fake

@@ -1,0 +1,43 @@
+services:
+  db:
+    image: postgres:14
+    environment:
+      POSTGRES_DB: provider_optimizer
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d/
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  provideroptimizer:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=provider_optimizer;Username=postgres;Password=postgres"
+    ports:
+      - "5000:8080"   # host:container  (la API escucha en 8080)
+    restart: on-failure
+
+  frontend:
+    build:
+      context: ./provider-optimizer-ui
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"      # React servido por Nginx
+    depends_on:
+      - provideroptimizer
+    environment:
+      REACT_APP_API_URL: "http://localhost:5000" # El frontend llama a la API
+
+volumes:
+  db_data:
