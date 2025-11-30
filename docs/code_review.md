@@ -1,18 +1,17 @@
-# Code Review - Defective Snippet Analysis
+# Code Review - Análisis de fragmentos defectuosos
 
-**Issues found:**
-- Uses a non-thread-safe List<T> as shared mutable state -> race conditions.
-- No async/await for IO-bound flows.
-- No input validation or null checking.
-- AssignProvider picks the first provider without selection policy.
-- No transactions or persistence; Remove may fail under concurrency.
-- No SOLID: class does multiple responsibilities and exposes mutable state.
-- No DTOs or error handling.
+**Problemas encontrados:**
+- Utiliza una List<T> no segura para subprocesos como estado mutable compartido -> condiciones de carrera.
+- No se permite async/await para flujos vinculados a E/S.
+- No se permite validación de entrada ni comprobación de valores nulos.
+- AssignProvider selecciona el primer proveedor sin política de selección.
+- No se permiten transacciones ni persistencia; Remove puede fallar en concurrencia.
+- No se permite SOLID: la clase asume múltiples responsabilidades y expone el estado mutable.
+- No se permiten DTO ni gestión de errores.
 
-**Recommendations / Refactor:**
-- Use a thread-safe concurrent collection or coordinate via DB transactions.
-- Implement validation (guard clauses).
-- Use interfaces and DI for repository and provider selection policy.
-- Implement an ISelectionPolicy strategy (DistanceBasedPolicy, RatingPolicy).
-- Make methods async when calling IO and return Result/Option types for failures.
-- Add unit tests covering concurrency and edge cases.
+**Recomendaciones/Refactorización:**
+- Utilizar una recopilación concurrente segura para subprocesos o coordinarse mediante transacciones de BD.
+- Implementar validación (cláusulas de protección).
+- Utilizar interfaces y DI para la política de selección de repositorios y proveedores.
+- Implementar una estrategia ISelectionPolicy (DistanceBasedPolicy, RatingPolicy).
+- Hacer que los métodos sean asíncronos al llamar a E/S y devolver los tipos Result/Option en caso de fallo. - Agregar pruebas unitarias que cubran la concurrencia y los casos extremos.

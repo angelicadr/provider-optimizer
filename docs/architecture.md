@@ -1,30 +1,47 @@
 # Arquitectura propuesta (C4 level 1-3) - Resumen
 
 ## C4 - Level 1 (System Context)
-- Mobile App (cliente)
-- API Gateway (Auth, rate limiting)
-- Microservices: AssistanceRequestService, ProviderOptimizerService, NotificationsService, LocationService
-- Datastores: RDS (Postgres), Redis (cache), S3 (storage)
-- Message broker: SQS / SNS for events between services
-- Observability: CloudWatch / Prometheus + Grafana / ELK
 
+- Aplicación móvil (cliente)
+
+- API Gateway (Autenticación, limitación de velocidad)
+
+- Microservicios: Servicio de solicitud de asistencia, Servicio de optimización de proveedores, Servicio de notificaciones, Servicio de ubicación
+
+- Almacenes de datos: RDS (Postgres), Redis (caché), S3 (almacenamiento)
+
+- Agente de mensajes: SQS/SNS para eventos entre servicios
+
+- Observabilidad: CloudWatch/Prometheus + Grafana/ELK
+  
 ## C4 - Level 2 (Container)
-- API Gateway -> routes to microservices (REST + gRPC)
-- ProviderOptimizerService: .NET 7 microservice (domain logic) - exposes /optimize
+
+- API Gateway -> rutas a microservicios (REST + gRPC)
+
+- ProviderOptimizerService: microservicio .NET 8 (lógica de dominio) - expone/optimiza
+
 - AssistanceRequestService: ingresa solicitudes
-- NotificationsService: envía push / sms
-- LocationService: reverse geocoding, geo-fencing
+
+- NotificationsService: envía notificaciones push/sms
+
+- LocationService: geocodificación inversa, geocercado
 
 ## C4 - Level 3 (Components) - ProviderOptimizerService
-- API Layer (Controllers / Minimal API)
-- Application (UseCases, DTOs, Interfaces)
-- Domain (Entities, ValueObjects, Aggregates)
-- Infrastructure (EF Core, Repositories, External clients)
+
+- Capa API (Controladores/API mínima)
+
+- Aplicación (Casos de uso, DTO, Interfaces)
+
+- Dominio (Entidades, Objetos de valor, Agregados)
+
+- Infraestructura (Núcleo de EF, Repositorios, Clientes externos)  
 
 ## Eventos y contratos
-- Events:
-  - AssistanceRequested (produced by AssistanceRequestService)
-  - ProviderAssigned (produced by ProviderOptimizerService)
-  - ProviderNotified (produced by NotificationsService)
-- Use JSON contracts on SNS/SQS. Apply schema versioning.
 
+- AssistanceRequested (generado por AssistanceRequestService)
+
+- ProviderAssigned (generado por ProviderOptimizerService)
+
+- ProviderNotified (generado por NotificationsService)
+
+- Usar contratos JSON en SNS/SQS. Aplicar control de versiones del esquema.
