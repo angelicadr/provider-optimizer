@@ -39,13 +39,24 @@ export default function OptimizeForm() {
         services: assistanceType
       };
 
-      const response = await axios.post(`${API_BASE}/optimize`, payload, {
-        headers: { "Content-Type": "application/json" },
-        timeout: 10000
-      });
+      const response = await axios.post(`${API_BASE}/optimize`, payload);
 
-      // API may return 201 with body or 200
-      setResult(response.data || null);
+      // Set initial response
+      setResult({ ...response.data, tracking: [] });
+
+      // --- TRACKING SSE ---
+      const eventSource = new EventSource(`${API_BASE}/tracking/${response.data.requestId}`);
+
+      eventSource.onmessage = (event) => {
+        setResult(prev => ({
+          ...prev,
+          tracking: [...prev.tracking, event.data]
+        }));
+      };
+
+      eventSource.onerror = () => {
+        eventSource.close();
+      };
     } catch (err) {
       console.error(err);
       const message = err?.response?.data || err.message || "Error al contactar la API";
@@ -139,11 +150,18 @@ export default function OptimizeForm() {
                       )}
                     </p>
                   </div>
-                </>
+                
+                {/* 🔥 TRACKING EN TIEMPO REAL */}
+              <h4>Seguimiento en tiempo real</h4>
+              <ul>
+                {result.tracking?.map((t, i) => (
+                  <li key={i}>📡 {t}</li>
+                ))}
+              </ul>
+             </>
               )}
             </div>
           )}
-
     </div>
   );
 }

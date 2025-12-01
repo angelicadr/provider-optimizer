@@ -7,6 +7,9 @@ using Microsoft.EntityFrameworkCore;
 using ProviderOptimizer.Application.Contracts;
 using ProviderOptimizer.Application.Services;
 using ProviderOptimizer.Infrastructure;
+using ProviderOptimizer.API.Hubs;      // ✔️ TrackingHub
+using System.Threading.Tasks;          // ✔️ Para Task
+
 internal class Program
 {
     private static void Main(string[] args)
@@ -25,6 +28,10 @@ internal class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
+        builder.Services.AddSignalR();
+       
+
+
         // CORS CORRECTO PARA .NET 8
         builder.Services.AddCors(options =>
         {
@@ -38,6 +45,7 @@ internal class Program
 
         app.UseSwagger();
         app.UseSwaggerUI();
+        app.MapHub<TrackingHub>("/trackingHub");
 
         // Habilitar CORS para TODAS las rutas
         app.UseCors("AllowAll");
@@ -55,6 +63,28 @@ internal class Program
             var result = await optimizer.OptimizeAndSaveAsync(request);
             return Results.Created($"/optimizations/{result.Id}", result);
         });
+
+        app.MapGet("/tracking/{requestId}", async (HttpResponse response, string requestId) =>
+        {
+            response.Headers.Append("Content-Type", "text/event-stream");
+
+            for (int i = 0; i < 5; i++)
+            {
+                var msg = i switch
+                {
+                    0 => "Solicitud recibida",
+                    1 => "Validando ubicación",
+                    2 => "Buscando proveedor disponible",
+                    3 => "Proveedor encontrado",
+                    _ => "Finalizando solicitud"
+                };
+
+                await response.WriteAsync($"data: {msg}\n\n");
+                await response.Body.FlushAsync();
+                await Task.Delay(1500);
+            }
+        });
+
         
         using (var scope = app.Services.CreateScope())
         {
